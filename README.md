@@ -1,1 +1,1 @@
-# tarea-2-iic3675
+# Tarea 2 IIC3675 Aprendizaje Reforzado
