@@ -52,38 +52,41 @@ class ValueIteration:
         if action_values:
             a = max(action_values.values())
             print(f"Estado {state}")
+            aux = []
             for i in action_values:
                 if action_values[i] == a:
                     print(f"{i}")
-            sleep(1)
+                    aux.append(i)
+            #sleep(1)
             print("\n")
-            return max(action_values, key=action_values.get)
+            return aux
+            #return max(action_values, key=action_values.get)
         else:
-            return 0
+            #return 0
+            return [0]
 
             
-        
-    
 
     def get_optimal_policies(self):
         values = {}
         for state in self.problem.states:
             values[state] = self.get_optimal_policie(state)
-    
-        llaves = list(values.keys())
-        valores = list(values.values())
 
-    # Usamos scatter para dibujar puntos
-        plt.scatter(llaves, valores, color='blue')  # Puedes cambiar el color si quieres
+        x_values = list(values.keys())  
+        y_values = list(values.values()) 
 
-        plt.xlabel('Llaves')
-        plt.ylabel('Valores')
-        plt.title('Gráfico de apuestas óptimas')
+            
+        for x, y_list in zip(x_values, y_values):
+            plt.scatter([x] * len(y_list), y_list, color="blue")  
+
+            # Etiquetas y título
+        plt.xlabel("Claves (X)")
+        plt.ylabel("Valores (Y)")
+        plt.title("Gráfica de un diccionario con listas asociadas")
         plt.grid(True)
 
-    # Guardamos el gráfico en la raíz del proyecto
-        plt.savefig('grafico_optimo.png')
-
+        plt.savefig('grafico_optimo_final.png')
+        
 
 
                 
