@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from time import sleep
 
 class ValueIteration:
     def __init__(self, gamma, problem, threshold = 0.0000000001):
@@ -41,6 +40,9 @@ class ValueIteration:
     
 
     def get_optimal_policie(self, state):
+        """
+        Obtiene la política óptima para un estado específico
+        """
         actions = self.problem.get_available_actions(state)
         action_values = {}
         for action in actions:
@@ -48,26 +50,20 @@ class ValueIteration:
             transitions = self.problem.get_transitions(state, action)
             for prob, next_state, r in transitions:
                 action_value += prob * (r + self.gamma * self.v_values[next_state])
-            action_values[action] = round(action_value, 5)
+            action_values[action] = round(action_value, 5) # Redondeamos al 5 decimal como se indica en el enunciado
         if action_values:
             a = max(action_values.values())
-            print(f"Estado {state}")
             aux = []
             for i in action_values:
                 if action_values[i] == a:
-                    print(f"{i}")
                     aux.append(i)
-            #sleep(1)
-            print("\n")
             return aux
-            #return max(action_values, key=action_values.get)
         else:
-            #return 0
             return [0]
 
             
 
-    def get_optimal_policies(self):
+    def get_optimal_policies(self, filename: str):
         values = {}
         for state in self.problem.states:
             values[state] = self.get_optimal_policie(state)
@@ -79,13 +75,11 @@ class ValueIteration:
         for x, y_list in zip(x_values, y_values):
             plt.scatter([x] * len(y_list), y_list, color="blue")  
 
-            # Etiquetas y título
-        plt.xlabel("Claves (X)")
-        plt.ylabel("Valores (Y)")
-        plt.title("Gráfica de un diccionario con listas asociadas")
+        plt.xlabel("Capital")
+        plt.ylabel("Final Policy")
         plt.grid(True)
 
-        plt.savefig('grafico_optimo_final.png')
+        plt.savefig(f'{filename}.png')
         
 
 

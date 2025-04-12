@@ -1,6 +1,6 @@
 from time import sleep
 
-class IterativePolicyIteration:
+class IterativePolicyEvaluation:
     def __init__(self, gamma, problem, threshold = 0.0000000001):
         self.problem = problem
         self.threshold = threshold
@@ -20,14 +20,13 @@ class IterativePolicyIteration:
                     if self.problem.is_terminal(s): 
                         continue
                     for prob, next_s, r in self.problem.get_transitions(state = s, action=action):
-                        new_v += prob * (1 / num_actions) * (r + self.gamma * self.v_values[next_s])
+                        new_v += (1 / num_actions) * prob * (r + self.gamma * self.v_values[next_s])
                 self.v_values[s] = new_v
                 error = max(error, abs(v - self.v_values[s]))
             
             if error < self.threshold:
                 break
     
-
 
     def get_initial_state_value(self):
         return self.v_values[self.problem.get_initial_state()]
@@ -39,19 +38,18 @@ class IterativePolicyIteration:
             for s in self.v_values:
                 actions = self.problem.get_available_actions(s)
                 v = self.v_values[s]
-                new_v = 0
-                aux = 0
-                
+                new_v = 0                
                 if self.problem.is_terminal(s): 
                         continue
                 
-                greedy_a = self.get_greedy_actions(s)
+                greedy_actions = self.get_greedy_actions(s)
+
                 for action in actions:
-                    if action in greedy_a:
+                    if action in greedy_actions:
+                        aux = 0
                         for prob, next_s, r in self.problem.get_transitions(state = s, action=action):
                             aux += prob * (r + self.gamma * self.v_values[next_s])
-                        new_v +=  aux
-                        break
+                        new_v += 1 / (len(greedy_actions)) * aux # Multiplicación por la política greedy. pi(a|s) = 1/len(greedy_actions) 
                 self.v_values[s] = new_v
                 error = max(error, abs(v - self.v_values[s]))
     
