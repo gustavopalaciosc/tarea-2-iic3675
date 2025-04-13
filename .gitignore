@@ -2,4 +2,5 @@ __pycache__
 test.py
 /env
 *.png
-*.txt
+best_MC_policy.txt
+mc_original.txt

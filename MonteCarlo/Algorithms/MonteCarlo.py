@@ -1,19 +1,17 @@
 import random
 from time import sleep
-#from ..Environments.AbstractEnv import AbstractEnv
 
 class MonteCarloControl:
-    def __init__(self, env, gamma, epsilon, num_episodes):
+    def __init__(self, env, gamma, epsilon, num_episodes, num_episodes_report, num_greedy_runs):
         self.env = env
         self.gamma = gamma
         self.epsilon = epsilon
         self.num_episodes = num_episodes
+        self.num_episodes_report = num_episodes_report 
+        self.num_greedy_runs = num_greedy_runs 
         self.q_values = {}
         self.n_returns = {}
 
-
-
-   
 
     def get_optimal_action(self, state, actions):
         q_lookup = lambda a: self.q_values.get((state, a), 0)
@@ -26,12 +24,10 @@ class MonteCarloControl:
         done = False
         
         while not done:
-            #sleep(0.125)
-            #print(current_state)
             if random.random() < self.epsilon:
                 action = random.choice(self.env.action_space)
             else:
-                action = max(self.env.action_space, key=lambda action: self.q_values.get((state, action), 0))
+                action = self.get_optimal_action(state=state, actions=self.env.action_space)
 
             next_state, reward, done = self.env.step(action)
             trace.append([state, action, reward])
@@ -40,21 +36,28 @@ class MonteCarloControl:
         return trace
     
 
-    def run_greedy_policy(self):
+    def run_greedy_policy(self, show):
         state = self.env.reset()
         done = False
+        avg_return = 0
+        for i in range(self.num_greedy_runs):
+            g = 0
+            while not done:
+                if show:
+                    self.env.show()
+                action = self.get_optimal_action(state, self.env.action_space)
+                next_state, reward, done = self.env.step(action)
+                g += reward
+                state = next_state
 
-        while not done:
-            self.env.show()
-            action = self.get_optimal_action(state, self.env.action_space)
-            next_state, reward, done = self.env.step(action)
-            state = next_state
-            
+            avg_return += (g - avg_return) / (i + 1)
+        return avg_return
             
         
-
     def run_montecarlo(self):
-        v_initial_state = []
+        self.q_values = {}
+        self.n_returns = {}
+        greedy_returns = []
         for episode in range(self.num_episodes):
             trace = self.run_rollout()
             g = 0
@@ -69,13 +72,20 @@ class MonteCarloControl:
                 self.n_returns[(state, action)] += 1
                 self.q_values[(state, action)] += (g - self.q_values[(state, action)]) / self.n_returns[(state, action)]
             
-            v_initial_state.append(g)
-            if episode % 1000 == 0:
-                print(f"Ep. {episode}. Current return: {g:0.3f}. Avg return: {sum(v_initial_state)/len(v_initial_state):0.3f}")
+            if episode % self.num_episodes_report == 0:
+                if episode == 0:
+                    greedy_returns.append(g)
+                    print(f'Episodio {episode}. Retorno: {g}')
+                else:
+                    greedy_return = self.run_greedy_policy(False)
+                    greedy_returns.append(greedy_return)
+                    print(f'Episodio {episode}. Retorno greedy: {greedy_return}. Retorno episodio: {g}')
 
 
         for state_action in self.q_values:
             print(f"{state_action}: {self.q_values[state_action]}")
         print(len(self.q_values))
 
-        self.run_greedy_policy()
+        self.run_greedy_policy(True)
+        print(self.q_values)
+        return greedy_returns

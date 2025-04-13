@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from Environments.CliffEnv import CliffEnv
 from Environments.BlackjackEnv import BlackjackEnv
 from Algorithms.MonteCarlo import MonteCarloControl
@@ -5,49 +6,68 @@ from Algorithms.MonteCarlo import MonteCarloControl
 
 class CorrectorMain:
     def __init__(self):
-        self.num_episodes = None
-        self.epsilon = None
-        self.gamma = 1.0
         self.algorithm = None
+        self.env = None
+        self.runs = {f"Run {i}": None for i in range(1, 6)}
+        self.select_env()
 
 
-    def select_num_episodes(self):
+    def select_env(self):
         print("""
-ELECCIÓN NÚMERO DE EPISODIOS
+SELECCIONA EL PROBLEMA 
+[1] Blackjack
+[2] Cliff
 """)    
-        num_episodes = int(input("Ingrese número de episodios: "))
-        self.num_episodes = num_episodes
-        return 
-    
-
-    def select_epsilon(self):
-        print("""
-ELECCIÓN VALOR EPSILON
-""")    
-        epsilon = float(input("Ingrese valor de epsilon: "))
-        self.epsilon = epsilon
-        return
+        while True:
+            option = input("Selecciona un problema: ")
+            if option == "1":
+                self.env = BlackjackEnv()
+                self.algorithm = MonteCarloControl(env=self.env, 
+                                                   gamma=1.0, 
+                                                   epsilon=0.01, 
+                                                   num_episodes=10000000, 
+                                                   num_episodes_report=500000, 
+                                                   num_greedy_runs=100000)
+                break
+            elif option == "2":
+                while True:
+                    try:
+                        width = int(input("Ingrese ancho del ambiente Cliff: "))
+                        if 12 >= width >= 6: 
+                            break
+                        else:
+                            pass
+                    except:
+                        pass
+                self.env = CliffEnv(width=width)
+                self.algorithm = MonteCarloControl(env=self.env, 
+                                                   gamma=1.0, 
+                                                   epsilon=0.1, 
+                                                   num_episodes=200000,
+                                                   num_episodes_report=1000, 
+                                                   num_greedy_runs=1)
+                break
+            else:
+                print("Opción inválida")
+                pass
         
 
     def run(self):
-        pass
-        
+        for run in range(5):
+            returns = self.algorithm.run_montecarlo()
+            self.runs[f"Run {run + 1}"] = returns
+            print(self.runs)
 
 
+    def plot_runs(self):
 
+        for label, values in self.runs.items():
+            plt.plot(values, label=label)
 
+        plt.legend()
+        plt.xlabel("Episodio")
+        plt.ylabel("Rendimiento")
+        plt.title("Rendimiento política greedy")
+        plt.grid(True)
+        plt.savefig("graph_montecarlo.png")
 
-
-
-if __name__ == "__main__":
-    env = CliffEnv(width=6)
-    #env = BlackjackEnv()
-    
-    num_episodes = 200000
-    epsilon = 0.1
-    gamma = 1.0
-
-    exp = MonteCarloControl(env=env, gamma=gamma, epsilon=epsilon, num_episodes=num_episodes)
-    exp.run_montecarlo()
-
-    
