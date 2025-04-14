@@ -82,10 +82,12 @@ class MonteCarloControl:
                     print(f'Episodio {episode}. Retorno greedy: {greedy_return}. Retorno episodio: {g}')
 
 
-        for state_action in self.q_values:
-            print(f"{state_action}: {self.q_values[state_action]}")
-        print(len(self.q_values))
+        for state_action, value in sorted(self.q_values.items(), key=lambda x: x[0][0]):
+            print(f"{state_action}: {value}")
+        #for state_action in self.q_values:
+        #    print(f"{state_action}: {self.q_values[state_action]}")
+        #print(len(self.q_values))
 
         self.run_greedy_policy(True)
-        print(self.q_values)
+        #print(self.q_values)
         return greedy_returns
